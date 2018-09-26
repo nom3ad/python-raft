@@ -2,7 +2,7 @@
 import socket
 import select
 
-class BaseUDPServer(object):
+class BaseUDPTransport(object):
     max_dgarm_size_expected = 1024
 
     def __init__(self, address):
@@ -22,7 +22,6 @@ class BaseUDPServer(object):
 
         while not self.break_flag:
             readable, writable, errored = select.select([self.socket], [], [],0.01)
-            print readable, writable, errored 
             if readable:
                 data, addr = self.socket.recvfrom(self.max_dgarm_size_expected)
                 try:
@@ -33,3 +32,4 @@ class BaseUDPServer(object):
     def close(self):
         self.break_flag = True
         self.socket.close()
+

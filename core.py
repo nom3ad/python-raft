@@ -1,14 +1,15 @@
 from __future__ import print_function
 
-from udpserver import BaseUDPServer
+from transport import BaseUDPTransport
 import struct
 from wire import *
 
 
-class RaftUdpServer(BaseUDPServer):
+class RaftUdpTransport(BaseUDPTransport):
 
     def handle(self, data, address):  # pylint:disable=method-hidden
-        _type = data[0]
+        _type, server_id , term, data_len = unpack_dgram_header(data)
+
         if _type == TYPE_DATAGRAM_FRAGMENT:
             pass
 
@@ -28,6 +29,9 @@ class RaftUdpServer(BaseUDPServer):
             self.write(data, address)
             raise ValueError("unknown type")
 
+
 if __name__ == '__main__':
-    print('starting raft udp server on :9000')
-    RaftUdpServer(':9000').serve_forever()
+    print('starting raft udp transport on :9000')
+    rt = RaftUdpTransport(':9000').serve_forever() # bloks
+    # do whatever with rt
+    
