@@ -1,13 +1,14 @@
-
+```
 TYPE:        1 Byte
 DGCOUNT:     1 Byte
 DGID:        2 Bytes
 METHOD+ARGS: 1024 Bytes
 RPC_TIMEOUT_WAIT: 2 Bytes
-
+```
 
 HEARTBEAT/APPENDENTRY
 ================
+```
 TYPE_REQUEST_APPEND_ENTRY =  0x80
 TERM: 8Byte
 LEADER_ID: 16Byte
@@ -15,6 +16,7 @@ PREV_LOG_INDEX: 8Byte
 PREV_LOG_TERM: 8Byte
 COMMIT_INDEX: 8Byte
 DATA_LEN 1Byte (973)
+
 
 optional:
     DG_ID
@@ -28,17 +30,18 @@ MAX_BODY_SIZE: 512Bytes
 TYPE_RESPONSE_APPEND_ENTRY = 0x81
 TERM: 8Byte
 SUCCESS: 1Byte
-
+```
 
 FRAGMENTATION
 =============
-
+```
 TYPE_DATAGRAM_FRAGMENT = 0xF0
-
+```
 
 
 RequestVote
 ===============
+```
 TYPE_REQUEST_VOTE = 0x90
 CANDIDATE_ID: 16Byte
 TERM: 8Byte
@@ -48,3 +51,4 @@ LAST_LOG_TERM: 8Byte
 TYPE_RESPONSE_VOTE = 0x91
 TERM: 1Byte
 VOTE_GRANTED: 1byte
+```
