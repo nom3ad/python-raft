@@ -26,6 +26,8 @@ class BaseUDPTransport(object):
                 data, addr = self.socket.recvfrom(self.max_dgarm_size_expected)
                 try:
                     self.handle(data, addr)
+                except NotImplementedError:
+                    raise
                 except:
                     pass
 

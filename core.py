@@ -11,7 +11,7 @@ class RaftUdpTransport(BaseUDPTransport):
         _type, server_id , term, data_len = unpack_dgram_header(data)
 
         if _type == TYPE_DATAGRAM_FRAGMENT:
-            pass
+            raise NotImplementedError
 
         elif _type == TYPE_REQUEST_VOTE:
             pass
