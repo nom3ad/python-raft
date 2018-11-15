@@ -1,3 +1,4 @@
+from __future__ import print_function
 from struct import Struct, calcsize
 from functools import partial
 
@@ -24,39 +25,43 @@ dgarm_header_struct = Struct(
     '!' + TYPE_FIELD + SERVER_ID_FEILD + TERM_FIELD
 )
 
-vote_request_preamble_struct = Struct('!' + LOG_INDEX_FIELD + LOG_INDEX_FIELD)
-vote_response_preamble_struct = Struct('!' + BOOL_FIELD)
+vote_request_struct = Struct('!' + LOG_INDEX_FIELD + LOG_INDEX_FIELD)
+vote_response_struct = Struct('!' + BOOL_FIELD)
 
-append_entry_preamble_struct = Struct(
-    '!' + LOG_INDEX_FIELD + LOG_INDEX_FIELD + DG_COUNT_FEILD + DG_ID_FIELD)
+append_entry_struct = Struct(
+    '!' + LOG_INDEX_FIELD + TERM_FIELD + LOG_INDEX_FIELD + DG_COUNT_FEILD + DG_ID_FIELD)
 
-fragment_preamble_struct = Struct('!' + DG_ID_FIELD + DG_INDEX_FEILD)
+fragment_struct = Struct('!' + DG_COUNT_FEILD +  DG_ID_FIELD + DG_INDEX_FEILD)
 
 DGRAM_HEADER_SZ = dgarm_header_struct.size 
 MAX_APPENDABLE_DG_COUNT = 256**calcsize(DG_COUNT_FEILD) - 1
 MAX_DGRAM_SIZE = 1024
 MAX_DG_PAYLOAD_SIZE = MAX_DGRAM_SIZE - (DGRAM_HEADER_SZ +
-                                        max(append_entry_preamble_struct.size,
-                                            vote_request_preamble_struct.size,
-                                            vote_response_preamble_struct.size,
-                                            fragment_preamble_struct.size)
+                                        max(append_entry_struct.size,
+                                            vote_request_struct.size,
+                                            vote_response_struct.size,
+                                            fragment_struct.size)
                                         )
+
+
+APPEND_ENTRY_PREAMBLE_SZ = DGRAM_HEADER_SZ + append_entry_struct.size
+FRAGMENTED_DG_PREAMBLE_SZ = DGRAM_HEADER_SZ + fragment_struct.size
 
 MAX_APPENDENTRY_SIZE = MAX_DG_PAYLOAD_SIZE * MAX_APPENDABLE_DG_COUNT
 
-print (MAX_APPENDABLE_DG_COUNT)
-print (MAX_DG_PAYLOAD_SIZE)
-print (MAX_APPENDENTRY_SIZE/1024, 'KB')
+print ("MAX_DG_PAYLOAD_SIZE:",MAX_DG_PAYLOAD_SIZE)
+print ("MAX_APPENDABLE_DG_COUNT:",MAX_APPENDABLE_DG_COUNT)
+print ("MAX_APPENDENTRY_SIZE:",MAX_APPENDENTRY_SIZE/1024, 'KB')
 
 
 unpack_dgram_header = dgarm_header_struct.unpack_from
 pack_dgram_header = dgarm_header_struct.pack
 
 
-unpack_vote_request_preamble = partial(vote_request_preamble_struct.unpack_from, offset=DGRAM_HEADER_SZ)
-unpack_vote_response_preamble = partial(vote_response_preamble_struct.unpack_from, offset=DGRAM_HEADER_SZ)
-
-unpack_appendentry_request_preamble = partial(append_entry_preamble_struct.unpack_from, offset=DGRAM_HEADER_SZ)
+unpack_vote_request_struct = partial(vote_request_struct.unpack_from, offset=DGRAM_HEADER_SZ)
+unpack_vote_response_struct = partial(vote_response_struct.unpack_from, offset=DGRAM_HEADER_SZ)
+unpack_appendentry_request_struct = partial(append_entry_struct.unpack_from, offset=DGRAM_HEADER_SZ)
+unpack_fragment_struct = partial(fragment_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 
 
 

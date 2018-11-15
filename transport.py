@@ -13,7 +13,7 @@ class BaseUDPTransport(object):
         self.break_flag = False
         self.write = self.socket.sendto
 
-    def handle(self, data, addr):
+    def datagram_received(self, data, addr):
         raise NotImplementedError
 
     def serve_forever(self):
@@ -25,11 +25,11 @@ class BaseUDPTransport(object):
             if readable:
                 data, addr = self.socket.recvfrom(self.max_dgarm_size_expected)
                 try:
-                    self.handle(data, addr)
+                    self.datagram_received(data, addr)
                 except NotImplementedError:
                     raise
-                except:
-                    pass
+                except Exception as oops:
+                    print("unhandled error on dg rcv:", oops)
 
     def close(self):
         self.break_flag = True
