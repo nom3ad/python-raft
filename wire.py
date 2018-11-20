@@ -64,6 +64,7 @@ pack_dgram_header = dgarm_header_struct.pack
 pack_vote_response_struct = vote_response_struct.pack
 pack_vote_request_struct = vote_request_struct.pack
 pack_heartbeat_struct = heartbeat_struct.pack
+
 unpack_vote_request_struct = partial(vote_request_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_vote_response_struct = partial(vote_response_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_appendentry_request_struct = partial(append_entry_struct.unpack_from, offset=DGRAM_HEADER_SZ)

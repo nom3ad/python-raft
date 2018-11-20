@@ -5,7 +5,7 @@ import struct
 from wire import *
 from state import *
 import array
-import threading
+
 
 
 vote_count=1    #my own vote
@@ -20,7 +20,6 @@ def on_vote_recieved(*k):
     vote_count+=1
     print("Hell")
     # if vote_count > peer_count/2:
-        
         
 
         
@@ -85,13 +84,17 @@ class RaftUdpTransport(BaseUDPTransport):
             print(term)
             print(self.my.term)
             if on_vote_request(term,self.my.term,cand_log_term,self.my.log_term,cand_log_idx,self.my.log_idx):
-                b = pack_vote_response_struct(True,)
+                response = True
+                b = pack_vote_response_struct(response,)
                 self.my.term=term
                 
             else:
-                b = pack_vote_response_struct(False,)
+                response = False
+                b = pack_vote_response_struct(response,)
+                self.my.term-=1
             #print(address)
             self.write(h+b,address)
+            return response
 
         elif _type == TYPE_RESPONSE_VOTE:
             print('On vote rec')
@@ -126,17 +129,21 @@ class RaftUdpTransport(BaseUDPTransport):
             # print(address)
             raise ValueError("unknown type")
 
-    
+        return 1
 
 
 if __name__ == '__main__':
     print('starting raft udp transport on :8120')
-    rt = RaftUdpTransport('127.0.0.1:9000')
+    try:
+        rt = RaftUdpTransport('127.0.0.1:8120')
     # rt.register_timeoyt(10, when_timeout)
     # rt.register_timeoyt(60, on_evey_minute)
-    sender = threading.Thread(send_dat,args=(,))
-    rt.serve_forever()  # blocks
+    
+        rt.serve_forever()  # blocks
     # do whatever with rt
+    except Exception as e:
+        print('Exception',e)
+        #rt.close()
 
 
     
