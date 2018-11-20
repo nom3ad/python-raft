@@ -14,7 +14,9 @@ TERM_FIELD = 'Q'  # (8 bytes) unsigned long long  <-> integer
 
 BOOL_FIELD = '?'  # (1 byte)  <-> bool
 LOG_INDEX_FIELD = 'Q'  # (8 bytes) unsigned long long  <-> integer
+LOG_INDEX_TERM= 'Q'  # (8 bytes) unsigned long long  <-> integer
 
+HB = 'Q'
 # appendentry_data_seg
 DG_ID_FIELD = '8s'
 DG_COUNT_FEILD = 'H'
@@ -25,9 +27,12 @@ dgarm_header_struct = Struct(
     '!' + TYPE_FIELD + SERVER_ID_FEILD + TERM_FIELD
 )
 
-vote_request_struct = Struct('!' + LOG_INDEX_FIELD + LOG_INDEX_FIELD)
+vote_request_struct = Struct('!' + LOG_INDEX_FIELD + LOG_INDEX_TERM)
 vote_response_struct = Struct('!' + BOOL_FIELD)
 
+heartbeat_struct=Struct(
+    '!' + HB
+)
 append_entry_struct = Struct(
     '!' + LOG_INDEX_FIELD + TERM_FIELD + LOG_INDEX_FIELD + DG_COUNT_FEILD + DG_ID_FIELD)
 
@@ -56,8 +61,9 @@ print ("MAX_APPENDENTRY_SIZE:",MAX_APPENDENTRY_SIZE/1024, 'KB')
 
 unpack_dgram_header = dgarm_header_struct.unpack_from
 pack_dgram_header = dgarm_header_struct.pack
-
-
+pack_vote_response_struct = vote_response_struct.pack
+pack_vote_request_struct = vote_request_struct.pack
+pack_heartbeat_struct = heartbeat_struct.pack
 unpack_vote_request_struct = partial(vote_request_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_vote_response_struct = partial(vote_response_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_appendentry_request_struct = partial(append_entry_struct.unpack_from, offset=DGRAM_HEADER_SZ)

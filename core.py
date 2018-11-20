@@ -3,14 +3,32 @@ from __future__ import print_function
 from transport import BaseUDPTransport
 import struct
 from wire import *
+from state import *
 import array
+import threading
 
 
+vote_count=1    #my own vote
+peer_count=0
 def on_append_entry_recieved(leader_id, term, prev_log_idx,
                              prev_log_term, commit_idx, payload):
     pass
 
-def on_vote_recieved(*k):pass
+# server_obj=Server()
+def on_vote_recieved(*k):
+    global vote_count
+    vote_count+=1
+    print("Hell")
+    # if vote_count > peer_count/2:
+        
+        
+
+        
+def on_vote_request(cand_term,curr_term,cand_log_term,curr_log_term,cand_log_idx,curr_log_idx):
+    if cand_term>curr_term and cand_log_idx>=curr_log_idx and cand_log_term>=curr_log_term:
+        return True
+    else:
+        return False
 
 class PartialAppendEntry:
     def __init__(self, dg_count):
@@ -41,6 +59,9 @@ class RaftUdpTransport(BaseUDPTransport):
 
     # def __init__(self, address, raft_engine):
     #     self.raft_engine = raft_engine
+   
+            #print(nodes[0],nodes[1])
+
 
     def datagram_received(self, data, address):  # pylint:disable=method-hidden
         _type, server_id, term = unpack_dgram_header(data)
@@ -58,11 +79,27 @@ class RaftUdpTransport(BaseUDPTransport):
                                          pae.club_payloads())
 
         elif _type == TYPE_REQUEST_VOTE:
-            pass
+            print('On vote req')
+            cand_log_idx,cand_log_term = unpack_vote_request_struct(data)
+            h = pack_dgram_header(TYPE_RESPONSE_VOTE,'10',self.my.term)
+            print(term)
+            print(self.my.term)
+            if on_vote_request(term,self.my.term,cand_log_term,self.my.log_term,cand_log_idx,self.my.log_idx):
+                b = pack_vote_response_struct(True,)
+                self.my.term=term
+                
+            else:
+                b = pack_vote_response_struct(False,)
+            #print(address)
+            self.write(h+b,address)
 
         elif _type == TYPE_RESPONSE_VOTE:
+            print('On vote rec')
             (voted,) = unpack_vote_response_struct(data)
-            on_vote_recieved(server_id, term, voted)
+            print(voted)
+            if voted:
+                self.my.state = STATE_LEADER
+                on_vote_recieved(server_id, term, voted)
 
         elif _type == TYPE_REQUEST_APPENDENTRY:
             (prev_log_idx, prev_log_term,
@@ -78,17 +115,28 @@ class RaftUdpTransport(BaseUDPTransport):
                                          prev_log_term, commit_idx, payload):
                     fragmented_map.pop(dg_id, None)
                     on_append_entry_recieved(server_id, term, prev_log_idx,
-                                             prev_log_term, commit_idx, pae.club_payloads())
+                                             prev_log_term, 
+                                             commit_idx, pae.club_payloads())
 
         elif _type == TYPE_RESPONSE_APPENDENTRY:
             pass
 
         else:
             self.write(data, address)
+            # print(address)
             raise ValueError("unknown type")
+
+    
 
 
 if __name__ == '__main__':
-    print('starting raft udp transport on :9000')
-    rt = RaftUdpTransport(':9000').serve_forever()  # bloks
+    print('starting raft udp transport on :8120')
+    rt = RaftUdpTransport('127.0.0.1:9000')
+    # rt.register_timeoyt(10, when_timeout)
+    # rt.register_timeoyt(60, on_evey_minute)
+    sender = threading.Thread(send_dat,args=(,))
+    rt.serve_forever()  # blocks
     # do whatever with rt
+
+
+    
