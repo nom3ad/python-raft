@@ -15,7 +15,7 @@ class Server(object):
         self.log_idx=0
         self.term=0
         self.log_term=0
-        self.node_dict={0:('127.0.0.1',8120,True),0:('127.0.0.1',9000,True)}
+        self.node_dict={0:('127.0.0.1',8120,True),1:('127.0.0.1',8121,True),2:('127.0.0.1',8122,True)}
 
     def run(self):
         while True:

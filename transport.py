@@ -25,16 +25,18 @@ class BaseUDPTransport(object):
         self.my=Server()
         self.sender = threading.Thread(target=self.send_dat,args=())
         self.event = threading.Event()
+        self.peers_voted = 0
         
     def send_dat(self):
         while not self.break_flag:
             i=0
-            print('Hi')
+            
             self.event.wait()
+            print('Hi')
             if not self.break_flag:
                 i+=i
                 h = pack_dgram_header(TYPE_REQUEST_APPENDENTRY,'13',self.my.term)
-                b = pack_heartbeat_struct('Beating '+str(i))
+                b = pack_heartbeat_struct('Bt '+str(i))
                 for node in self.my.node_dict.itervalues():
                     if self.server_address != (node[0],node[1]):
                         # print("Call ele1",(node[0],node[1]),self.server_address) 
@@ -58,16 +60,20 @@ class BaseUDPTransport(object):
         
         self.sender.start()
         last_timeout = time.time()
+        state=0
         while not self.break_flag:
             
             if (time.time()-last_timeout)> time_out:
                 if self.my.state == STATE_LEADER:
                     self.event.set()
-                    self.event.clear()              #If we dont add a thread we wont recieve the
+                    self.event.clear()  
+                    state=0            #If we dont add a thread we wont recieve the
                 else:                       #response of the append entries
                     last_timeout = time.time()
                     if self.my.state == STATE_CANDIDATE:
-                        break
+                        state+=1
+                        if state==3:
+                            break
                     self.my.term += 1     #Calling election increments the candidate term
                     self.call_election()
                     self.my.state = STATE_CANDIDATE    
@@ -79,7 +85,8 @@ class BaseUDPTransport(object):
                     print('transp',addr)
                     req_state = self.datagram_received(data, addr)
                     if req_state:
-                        last_timeout = time.time()           
+                        last_timeout = time.time()  
+                        state=0         
             except KeyboardInterrupt:
                 self.close()
             

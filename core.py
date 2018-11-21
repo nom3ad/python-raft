@@ -5,11 +5,13 @@ import struct
 from wire import *
 from state import *
 import array
+import time
+import sys
 
 
 
 vote_count=1    #my own vote
-peer_count=0
+
 def on_append_entry_recieved(leader_id, term, prev_log_idx,
                              prev_log_term, commit_idx, payload):
     pass
@@ -85,13 +87,13 @@ class RaftUdpTransport(BaseUDPTransport):
             print(self.my.term)
             if on_vote_request(term,self.my.term,cand_log_term,self.my.log_term,cand_log_idx,self.my.log_idx):
                 response = True
-                b = pack_vote_response_struct(response,)
+                b = pack_vote_response_struct(response)
                 self.my.term=term
                 
             else:
                 response = False
-                b = pack_vote_response_struct(response,)
-                self.my.term-=1
+                b = pack_vote_response_struct(response)
+                
             #print(address)
             self.write(h+b,address)
             return response
@@ -101,8 +103,13 @@ class RaftUdpTransport(BaseUDPTransport):
             (voted,) = unpack_vote_response_struct(data)
             print(voted)
             if voted:
-                self.my.state = STATE_LEADER
+                self.peers_voted+=1
+                if self.peers_voted >= int(self.my.peers/2):
+                    self.my.state = STATE_LEADER
                 on_vote_recieved(server_id, term, voted)
+            else:
+                self.my.term-=1
+                print('votereq fal',self.my.term)
 
         elif _type == TYPE_REQUEST_APPENDENTRY:
             (prev_log_idx, prev_log_term,
@@ -123,6 +130,10 @@ class RaftUdpTransport(BaseUDPTransport):
 
         elif _type == TYPE_RESPONSE_APPENDENTRY:
             pass
+        elif _type == TYPE_HB:
+            print('HB broke?')
+            bt = unpack_heartbeat_struct(data)
+            print("HB "+bt)
 
         else:
             self.write(data, address)
@@ -133,16 +144,17 @@ class RaftUdpTransport(BaseUDPTransport):
 
 
 if __name__ == '__main__':
-    print('starting raft udp transport on :8120')
+    print('starting raft udp transport on :'+sys.argv[1])
+    time.sleep(5)
     try:
-        rt = RaftUdpTransport('127.0.0.1:8120')
+        rt = RaftUdpTransport('127.0.0.1:'+sys.argv[1])
     # rt.register_timeoyt(10, when_timeout)
     # rt.register_timeoyt(60, on_evey_minute)
     
         rt.serve_forever()  # blocks
     # do whatever with rt
     except Exception as e:
-        print('Exception',e)
+        print('Exception here',e)
         #rt.close()
 
 
