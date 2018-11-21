@@ -6,6 +6,7 @@ from wire import *
 from state import *
 import random
 import threading
+import pdb
 time_out=random.randint(4,13)
 
 
@@ -63,7 +64,7 @@ class BaseUDPTransport(object):
         last_timeout = time.time()
         state=0
         while not self.break_flag:
-            
+            # pdb.set_trace()
             if (time.time()-last_timeout)> time_out:
                 if self.my.state == STATE_LEADER:
                     self.event.set()
@@ -72,6 +73,7 @@ class BaseUDPTransport(object):
                 else:                       #response of the append entries
                     last_timeout = time.time()
                     if self.my.state == STATE_CANDIDATE:
+                        self.my.term -= 1
                         state+=1
                         if state==3:
                             break

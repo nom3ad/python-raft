@@ -20,7 +20,7 @@ def on_append_entry_recieved(leader_id, term, prev_log_idx,
 def on_vote_recieved(*k):
     global vote_count
     vote_count+=1
-    print("Hell")
+    print("Elected as leader")
     # if vote_count > peer_count/2:
         
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         rt = RaftUdpTransport('127.0.0.1:'+sys.argv[1])
     # rt.register_timeoyt(10, when_timeout)
     # rt.register_timeoyt(60, on_evey_minute)
-    
+       # pdb.set_trace()
         rt.serve_forever()  # blocks
     # do whatever with rt
     except Exception as e:
