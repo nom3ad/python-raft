@@ -6,7 +6,7 @@ from wire import *
 from state import *
 import random
 import threading
-time_out=random.randint(4,7)
+time_out=random.randint(4,13)
 
 
     
@@ -26,17 +26,18 @@ class BaseUDPTransport(object):
         self.sender = threading.Thread(target=self.send_dat,args=())
         self.event = threading.Event()
         self.peers_voted = 0
+        print(time_out)
         
     def send_dat(self):
         while not self.break_flag:
-            i=0
+            # i=0
             
             self.event.wait()
-            print('Hi')
+            # print('Hi')
             if not self.break_flag:
-                i+=i
-                h = pack_dgram_header(TYPE_REQUEST_APPENDENTRY,'13',self.my.term)
-                b = pack_heartbeat_struct('Bt '+str(i))
+                # i+=i
+                h = pack_dgram_header(TYPE_HB,'13',self.my.term)
+                b = pack_heartbeat_struct('Bt')
                 for node in self.my.node_dict.itervalues():
                     if self.server_address != (node[0],node[1]):
                         # print("Call ele1",(node[0],node[1]),self.server_address) 

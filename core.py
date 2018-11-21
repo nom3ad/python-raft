@@ -65,9 +65,12 @@ class RaftUdpTransport(BaseUDPTransport):
 
 
     def datagram_received(self, data, address):  # pylint:disable=method-hidden
+       
+        print('header broke?')
         _type, server_id, term = unpack_dgram_header(data)
         # assert data_len == len(data)
         if _type == TYPE_DATAGRAM_FRAGMENT:
+            print('data frag broke?')
             dg_count, dg_id, dg_index = unpack_fragment_struct(data)
             payload = data[FRAGMENTED_DG_PREAMBLE_SZ:]
             pae = fragmented_map.get(dg_id, PartialAppendEntry(dg_count))
@@ -100,7 +103,7 @@ class RaftUdpTransport(BaseUDPTransport):
 
         elif _type == TYPE_RESPONSE_VOTE:
             print('On vote rec')
-            (voted,) = unpack_vote_response_struct(data)
+            (voted,) = unpack_vote_response_struct(data,)
             print(voted)
             if voted:
                 self.peers_voted+=1
@@ -112,6 +115,7 @@ class RaftUdpTransport(BaseUDPTransport):
                 print('votereq fal',self.my.term)
 
         elif _type == TYPE_REQUEST_APPENDENTRY:
+            print('req_app broke?')
             (prev_log_idx, prev_log_term,
              commit_idx, dg_count, dg_id) = unpack_appendentry_request_struct(data)
             payload = data[APPEND_ENTRY_PREAMBLE_SZ:]
@@ -133,7 +137,7 @@ class RaftUdpTransport(BaseUDPTransport):
         elif _type == TYPE_HB:
             print('HB broke?')
             bt = unpack_heartbeat_struct(data)
-            print("HB "+bt)
+            print("HB "+str(bt))
 
         else:
             self.write(data, address)
