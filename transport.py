@@ -85,7 +85,7 @@ class BaseUDPTransport(object):
                 readable, writable, errored = select.select([self.socket], [], [],0.01)
                 if readable:
                     data, addr = self.socket.recvfrom(self.max_dgarm_size_expected)
-                    print('transp',addr)
+#                    print('transp',addr)
                     req_state = self.datagram_received(data, addr)
                     if req_state:
                         last_timeout = time.time()  

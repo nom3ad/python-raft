@@ -7,6 +7,8 @@ from state import *
 import array
 import time
 import sys
+import threading
+from smp_http import ak
 
 
 
@@ -66,7 +68,7 @@ class RaftUdpTransport(BaseUDPTransport):
 
     def datagram_received(self, data, address):  # pylint:disable=method-hidden
        
-        print('header broke?')
+        #print('header broke?')
         _type, server_id, term = unpack_dgram_header(data)
         # assert data_len == len(data)
         if _type == TYPE_DATAGRAM_FRAGMENT:
@@ -135,10 +137,15 @@ class RaftUdpTransport(BaseUDPTransport):
         elif _type == TYPE_RESPONSE_APPENDENTRY:
             pass
         elif _type == TYPE_HB:
-            print('HB broke?')
+            #print('HB broke?')
             bt = unpack_heartbeat_struct(data)
-            print("HB "+str(bt))
+#            print("HB "+str(bt))
+            #print(address)
+            self.my.add_node_master(address)
 
+        # elif _type == TYPE_WB_REQUEST:
+        #     wb_req= unpack_get_post_struct(data)
+        #     print(wb_req)
         else:
             self.write(data, address)
             # print(address)
@@ -149,17 +156,22 @@ class RaftUdpTransport(BaseUDPTransport):
 
 if __name__ == '__main__':
     print('starting raft udp transport on :'+sys.argv[1])
-    time.sleep(5)
+    
+    time.sleep(1)
+
     try:
         rt = RaftUdpTransport('127.0.0.1:'+sys.argv[1])
     # rt.register_timeoyt(10, when_timeout)
     # rt.register_timeoyt(60, on_evey_minute)
        # pdb.set_trace()
+        ab=threading.Thread(target=ak,args=(sys.argv[2],rt.my.node_dict))
+        ab.start()
         rt.serve_forever()  # blocks
     # do whatever with rt
     except Exception as e:
         print('Exception here',e)
+        raise
         #rt.close()
 
-
+    
     

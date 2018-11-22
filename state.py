@@ -15,16 +15,18 @@ class Server(object):
         self.log_idx=0
         self.term=0
         self.log_term=0
-        self.node_dict={0:('127.0.0.1',8120,True),1:('127.0.0.1',8121,True),2:('127.0.0.1',8122,True)}
+        self.node_dict={0:['127.0.0.1',8120,False],1:['127.0.0.1',8121,False],2:['127.0.0.1',8122,False]}
 
     def run(self):
         while True:
             pass
 
-    def add_node(self, server_addr):
+    def add_node_master(self, server_addr):
         for value in self.node_dict.itervalues():
-            if value[0]==server_addr and value[2]==False:  #node_list=[ip_addr,port,actv/de-actv]
+            if (value[0],value[2])==server_addr and value[2]==False:  #node_list=[ip_addr,port,actv/de-actv]
                 value[2]=True
+            else:
+                value[2]=False
         
 # def when_timeout():
 #     pass

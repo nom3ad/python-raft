@@ -1,26 +1,29 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import SimpleHTTPServer
+import BaseHTTPServer
+import sys
 
-from io import BytesIO
-
-
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+class reqhand(BaseHTTPServer.BaseHTTPRequestHandler):
+    def __init__(self,node_dict):
+        self.nodes=node_dict
 
     def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'Hello, world!')
+        print 'Hello GET'
+        for value in self.nodes.itervalues():
+            if value[2]==True:
+                print value
 
+
+        
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
-        self.send_response(200)
-        self.end_headers()
-        response = BytesIO()
-        response.write(b'This is POST request. ')
-        response.write(b'Received: ')
-        response.write(body)
-        self.wfile.write(response.getvalue())
+        print 'Hello POST'
+        pass
+
+    def do_HEAD(self):
+        pass
 
 
-httpd = HTTPServer(('home.flytxt.com', 8000), SimpleHTTPRequestHandler)
-httpd.serve_forever()
+def ak(my_port,node_dict):
+
+    print 'Hello'
+    abc = BaseHTTPServer.HTTPServer(('',int(my_port)),reqhand(node_dict))
+    abc.serve_forever()

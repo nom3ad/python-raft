@@ -8,6 +8,7 @@ TYPE_REQUEST_VOTE = b'\x56'
 TYPE_RESPONSE_VOTE = b'\x57'
 TYPE_DATAGRAM_FRAGMENT = b'\x2D'
 TYPE_HB = b'\x40'
+TYPE_WB_REQUEST = b'\x42'
 
 TYPE_FIELD = 'c'  # 1 byte
 SERVER_ID_FEILD = '8s'  # 8 bytes
@@ -16,7 +17,12 @@ TERM_FIELD = 'Q'  # (8 bytes) unsigned long long  <-> integer
 BOOL_FIELD = '?'  # (1 byte)  <-> bool
 LOG_INDEX_FIELD = 'Q'  # (8 bytes) unsigned long long  <-> integer
 LOG_INDEX_TERM= 'Q'  # (8 bytes) unsigned long long  <-> integer
+#get and post
+LOG_INDEX_FIELD_WB = LOG_INDEX_FIELD
+GET_POST_REQ = '8s'
 
+
+#heartbeat
 HB = '8s'
 # appendentry_data_seg
 DG_ID_FIELD = '8s'
@@ -33,6 +39,9 @@ vote_response_struct = Struct('!' + BOOL_FIELD)
 
 heartbeat_struct=Struct(
     '!' + HB)
+get_post_req_struct = Struct(
+    '!' + LOG_INDEX_FIELD_WB + GET_POST_REQ )
+
 append_entry_struct = Struct(
     '!' + LOG_INDEX_FIELD + TERM_FIELD + LOG_INDEX_FIELD + DG_COUNT_FEILD + DG_ID_FIELD)
 
@@ -58,18 +67,19 @@ print ("MAX_DG_PAYLOAD_SIZE:",MAX_DG_PAYLOAD_SIZE)
 print ("MAX_APPENDABLE_DG_COUNT:",MAX_APPENDABLE_DG_COUNT)
 print ("MAX_APPENDENTRY_SIZE:",MAX_APPENDENTRY_SIZE/1024, 'KB')
 
-
-unpack_dgram_header = dgarm_header_struct.unpack_from
 pack_dgram_header = dgarm_header_struct.pack
+unpack_dgram_header = dgarm_header_struct.unpack_from
+
 pack_vote_response_struct = vote_response_struct.pack
 pack_vote_request_struct = vote_request_struct.pack
 pack_heartbeat_struct = heartbeat_struct.pack
+pack_get_post_struct = get_post_req_struct.pack
 
 unpack_heartbeat_struct= partial(heartbeat_struct.unpack_from,offset = DGRAM_HEADER_SZ)
 unpack_vote_request_struct = partial(vote_request_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_vote_response_struct = partial(vote_response_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_appendentry_request_struct = partial(append_entry_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_fragment_struct = partial(fragment_struct.unpack_from, offset=DGRAM_HEADER_SZ)
-
+unpack_get_post_struct = partial(get_post_req_struct.unpack_from,offset=DGRAM_HEADER_SZ)
 
 
