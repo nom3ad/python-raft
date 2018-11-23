@@ -8,7 +8,7 @@ import array
 import time
 import sys
 import threading
-from smp_http import ak
+from smp_http import *
 
 
 
@@ -64,7 +64,13 @@ class RaftUdpTransport(BaseUDPTransport):
     #     self.raft_engine = raft_engine
    
             #print(nodes[0],nodes[1])
-
+    # @property
+    # def node_dict(self):
+    #     return self.node_dict
+    # @node_dict.setter
+    # def node_dict(self, v)
+    #     reqhand.nodes=v
+    #     self.node_dict = v
 
     def datagram_received(self, data, address):  # pylint:disable=method-hidden
        
@@ -111,6 +117,7 @@ class RaftUdpTransport(BaseUDPTransport):
                 self.peers_voted+=1
                 if self.peers_voted >= int(self.my.peers/2):
                     self.my.state = STATE_LEADER
+                    self.my.add_node_master(self.server_address)
                 on_vote_recieved(server_id, term, voted)
             else:
                 self.my.term-=1
@@ -164,9 +171,10 @@ if __name__ == '__main__':
     # rt.register_timeoyt(10, when_timeout)
     # rt.register_timeoyt(60, on_evey_minute)
        # pdb.set_trace()
-        ab=threading.Thread(target=ak,args=(sys.argv[2],rt.my.node_dict))
+        ab=threading.Thread(target=ak,args=(sys.argv[2],rt))
         ab.start()
         rt.serve_forever()  # blocks
+
     # do whatever with rt
     except Exception as e:
         print('Exception here',e)

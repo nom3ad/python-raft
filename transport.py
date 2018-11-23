@@ -23,7 +23,7 @@ class BaseUDPTransport(object):
         self.server_address = addr, int(port)
         self.break_flag = False
         self.write = self.socket.sendto
-        self.my=Server()
+        self.my=Server(peers=3)
         self.sender = threading.Thread(target=self.send_dat,args=())
         self.event = threading.Event()
         self.peers_voted = 0

@@ -1,19 +1,21 @@
 import SimpleHTTPServer
 import BaseHTTPServer
 import sys
+import copy
 
 class reqhand(BaseHTTPServer.BaseHTTPRequestHandler):
-    def __init__(self,node_dict):
-        self.nodes=node_dict
+    nodes={}
 
     def do_GET(self):
         print 'Hello GET'
+        print 'Reqhand is ',reqhand.nodes
         for value in self.nodes.itervalues():
             if value[2]==True:
-                print value
+                print 'Master',value
 
 
-        
+    
+    
     def do_POST(self):
         print 'Hello POST'
         pass
@@ -22,8 +24,13 @@ class reqhand(BaseHTTPServer.BaseHTTPRequestHandler):
         pass
 
 
-def ak(my_port,node_dict):
+def ak(my_port,obj):
 
     print 'Hello'
-    abc = BaseHTTPServer.HTTPServer(('',int(my_port)),reqhand(node_dict))
+    reqhand.nodes=copy.copy(obj.my.node_dict)
+    
+    abc = BaseHTTPServer.HTTPServer(('',int(my_port)),reqhand)
+    import pdb
+    # pdb.set_trace()
+    print("running")
     abc.serve_forever()
