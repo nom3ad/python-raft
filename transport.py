@@ -7,7 +7,7 @@ from state import *
 import random
 import threading
 import pdb
-time_out=random.randint(4,13)
+time_out=random.randint(10,25)
 
 
     
@@ -75,7 +75,7 @@ class BaseUDPTransport(object):
                     if self.my.state == STATE_CANDIDATE:
                         self.my.term -= 1
                         state+=1
-                        if state==3:
+                        if state==3:      # Retry to connect with peers for 3 more times
                             break
                     self.my.term += 1     #Calling election increments the candidate term
                     self.call_election()

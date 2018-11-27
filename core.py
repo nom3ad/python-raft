@@ -73,7 +73,8 @@ class RaftUdpTransport(BaseUDPTransport):
     #     self.node_dict = v
 
     def datagram_received(self, data, address):  # pylint:disable=method-hidden
-       
+        log_json = []
+        f = open("log.json", "a")
         #print('header broke?')
         _type, server_id, term = unpack_dgram_header(data)
         # assert data_len == len(data)
@@ -100,6 +101,7 @@ class RaftUdpTransport(BaseUDPTransport):
                 response = True
                 b = pack_vote_response_struct(response)
                 self.my.term=term
+                self.my.state=STATE_FOLLOWER
                 
             else:
                 response = False
@@ -150,15 +152,23 @@ class RaftUdpTransport(BaseUDPTransport):
             #print(address)
             self.my.add_node_master(address)
 
-        # elif _type == TYPE_WB_REQUEST:
-        #     wb_req= unpack_get_post_struct(data)
-        #     print(wb_req)
+        elif _type == TYPE_WB_DATA:
+            a = time.time()
+            print(a)
+            wb_req, = unpack_wb_struct(data)
+            temp = wb_req.replace('\\x00','')
+            log_json.append([temp,self.my.term])
+            #f.write(log_json)
+            print(temp,log_json)
+            print(time.time() - a)
+            return False
         else:
+            #print(time.time())
             self.write(data, address)
             # print(address)
             raise ValueError("unknown type")
 
-        return 1
+        return True
 
 
 if __name__ == '__main__':

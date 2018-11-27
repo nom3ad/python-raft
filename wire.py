@@ -8,7 +8,8 @@ TYPE_REQUEST_VOTE = b'\x56'
 TYPE_RESPONSE_VOTE = b'\x57'
 TYPE_DATAGRAM_FRAGMENT = b'\x2D'
 TYPE_HB = b'\x40'
-TYPE_WB_REQUEST = b'\x42'
+TYPE_WB_DATA = b'\x42'
+
 
 TYPE_FIELD = 'c'  # 1 byte
 SERVER_ID_FEILD = '8s'  # 8 bytes
@@ -19,7 +20,7 @@ LOG_INDEX_FIELD = 'Q'  # (8 bytes) unsigned long long  <-> integer
 LOG_INDEX_TERM= 'Q'  # (8 bytes) unsigned long long  <-> integer
 #get and post
 LOG_INDEX_FIELD_WB = LOG_INDEX_FIELD
-GET_POST_REQ = '8s'
+GET_POST_WB = '300s'
 
 
 #heartbeat
@@ -39,8 +40,8 @@ vote_response_struct = Struct('!' + BOOL_FIELD)
 
 heartbeat_struct=Struct(
     '!' + HB)
-get_post_req_struct = Struct(
-    '!' + LOG_INDEX_FIELD_WB + GET_POST_REQ )
+wb_struct = Struct(
+    '!' +  GET_POST_WB )
 
 append_entry_struct = Struct(
     '!' + LOG_INDEX_FIELD + TERM_FIELD + LOG_INDEX_FIELD + DG_COUNT_FEILD + DG_ID_FIELD)
@@ -73,13 +74,13 @@ unpack_dgram_header = dgarm_header_struct.unpack_from
 pack_vote_response_struct = vote_response_struct.pack
 pack_vote_request_struct = vote_request_struct.pack
 pack_heartbeat_struct = heartbeat_struct.pack
-pack_get_post_struct = get_post_req_struct.pack
+pack_wb_struct = wb_struct.pack
 
 unpack_heartbeat_struct= partial(heartbeat_struct.unpack_from,offset = DGRAM_HEADER_SZ)
 unpack_vote_request_struct = partial(vote_request_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_vote_response_struct = partial(vote_response_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_appendentry_request_struct = partial(append_entry_struct.unpack_from, offset=DGRAM_HEADER_SZ)
 unpack_fragment_struct = partial(fragment_struct.unpack_from, offset=DGRAM_HEADER_SZ)
-unpack_get_post_struct = partial(get_post_req_struct.unpack_from,offset=DGRAM_HEADER_SZ)
+unpack_wb_struct = partial(wb_struct.unpack_from,offset=DGRAM_HEADER_SZ)
 
 
